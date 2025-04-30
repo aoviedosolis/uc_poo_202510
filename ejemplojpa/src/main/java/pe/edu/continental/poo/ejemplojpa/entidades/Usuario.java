@@ -9,7 +9,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 public class Usuario implements Serializable {
@@ -23,6 +25,10 @@ public class Usuario implements Serializable {
     private String usuario;
     @Column
     private String clave;
+    @Column
+    private String nombreCompleto;
+    @OneToMany(mappedBy = "responsable")
+    private List<Tarea> tareasAsignadas;
 
     public Usuario() {
         this.id = 0L;
@@ -30,10 +36,30 @@ public class Usuario implements Serializable {
         this.clave = "";
     }
 
-    public Usuario(String usuario, String clave) {
+    public Usuario(String usuario, String clave, String nombreCompleto, List<Tarea> tareasAsignadas) {
         this.usuario = usuario;
         this.clave = clave;
+        this.nombreCompleto = nombreCompleto;
+        this.tareasAsignadas = tareasAsignadas;
     }
+
+    public String getNombreCompleto() {
+        return nombreCompleto;
+    }
+
+    public void setNombreCompleto(String nombreCompleto) {
+        this.nombreCompleto = nombreCompleto;
+    }
+
+    public List<Tarea> getTareasAsignadas() {
+        return tareasAsignadas;
+    }
+
+    public void setTareasAsignadas(List<Tarea> tareasAsignadas) {
+        this.tareasAsignadas = tareasAsignadas;
+    }
+
+    
 
     public String getUsuario() {
         return usuario;

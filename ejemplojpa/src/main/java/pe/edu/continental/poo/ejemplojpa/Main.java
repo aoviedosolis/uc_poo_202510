@@ -17,24 +17,24 @@ import pe.edu.continental.poo.ejemplojpa.ui.FrmNuevoUsuario;
 public class Main {
 
     public static void main(String[] args) {
-        /*
+        
         EntityManagerFactory emf = null;
         
         try{
             emf = Persistence.createEntityManagerFactory("MyPersistenceUnit");
             
-            UsuarioJpaController uc = new UsuarioJpaController(emf);
-            
-            Usuario u1 = new Usuario("jdoe", "jdoe");
-            Usuario u2 = new Usuario("mperez","mperez");
-            
-            uc.create(u1);
-            uc.create(u2);
+//            UsuarioJpaController uc = new UsuarioJpaController(emf);
+//            
+//            Usuario u1 = new Usuario("jdoe", "jdoe");
+//            Usuario u2 = new Usuario("mperez","mperez");
+//            
+//            uc.create(u1);
+//            uc.create(u2);
                     
         }catch(Exception ex){
             ex.printStackTrace();
         }
-*/
+
          /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -59,10 +59,12 @@ public class Main {
         //</editor-fold>
 
         /* Create and display the form */
+        /*
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new FrmNuevoUsuario().setVisible(true);
             }
         });
+*/
     }
 }
