@@ -6,11 +6,17 @@ package pe.edu.continental.poo.taskapp.iu;
 
 import jakarta.persistence.EntityManagerFactory;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractListModel;
-import javax.swing.ListModel;
-import javax.swing.event.ListDataListener;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 import pe.edu.continental.poo.taskapp.controladores.ListaTareasJpaController;
+import pe.edu.continental.poo.taskapp.controladores.TareaJpaController;
+import pe.edu.continental.poo.taskapp.controladores.exceptions.NonexistentEntityException;
 import pe.edu.continental.poo.taskapp.entidades.ListaTareas;
+import pe.edu.continental.poo.taskapp.entidades.Tarea;
 import pe.edu.continental.poo.taskapp.entidades.Usuario;
 import pe.edu.continental.poo.taskapp.singleton.EntityManagerSingleton;
 
@@ -22,6 +28,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
     
     private Usuario usuario;
     private EntityManagerFactory emf;
+    private ListaTareas listaActual;
 
     /**
      * Creates new form FrmPrincipal
@@ -33,6 +40,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
         DlgLogin login = new DlgLogin(this, true);
         login.setVisible(true);
         usuario = login.getUsuario();
+        actualizarListaTareas();
     }
 
     /**
@@ -54,7 +62,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         pnlTareas = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblTareas = new javax.swing.JTable();
         jPanel4 = new javax.swing.JPanel();
         btnNuevaTarea = new javax.swing.JButton();
         btnModificarTarea = new javax.swing.JButton();
@@ -71,6 +79,11 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         pnlLista.setLayout(new java.awt.BorderLayout());
 
+        lstListaTareas.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                lstListaTareasValueChanged(evt);
+            }
+        });
         jScrollPane1.setViewportView(lstListaTareas);
 
         pnlLista.add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -106,19 +119,19 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         pnlTareas.setLayout(new java.awt.BorderLayout());
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblTareas.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Nombre", "Descripcion", "Prioridad", "Completado", "Fecha inicio", "Fecha fin"
+                "Id", "Nombre", "Descripcion", "Prioridad", "Completado", "Fecha inicio", "Fecha fin"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Boolean.class, java.lang.Object.class, java.lang.Object.class
+                java.lang.Long.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Boolean.class, java.lang.Object.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -129,7 +142,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane2.setViewportView(jTable1);
+        jScrollPane2.setViewportView(tblTareas);
 
         pnlTareas.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
@@ -143,6 +156,11 @@ public class FrmPrincipal extends javax.swing.JFrame {
         btnModificarTarea.setText("Modificar tarea");
 
         btnBorrarTarea.setText("Borrar tarea");
+        btnBorrarTarea.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBorrarTareaActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -225,15 +243,56 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
     private void btnNuevaTareaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevaTareaActionPerformed
         // TODO add your handling code here:
-        DlgTarea dlgTarea = new DlgTarea(this, true);
+        DlgTarea dlgTarea = new DlgTarea(this, true,listaActual);
         dlgTarea.setVisible(true);
-        
+        mostrarTareas(listaActual.getId());
     }//GEN-LAST:event_btnNuevaTareaActionPerformed
 
     private void btnBorrarListaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBorrarListaActionPerformed
         // TODO add your handling code here:
-        //lstListaTareas.getSe
+        listaActual = new ListaTareasJpaController(emf).getListaTareas(usuario.getId(), lstListaTareas.getSelectedValue());
+        ListaTareasJpaController ltjc = new ListaTareasJpaController(emf);
+        TareaJpaController tjc = new TareaJpaController(emf);
+        
+        int respuesta = JOptionPane.showConfirmDialog(this, "¿Esta seguro de borrar la lista?", "Borrar lista", JOptionPane.YES_NO_OPTION);
+        
+        if(respuesta==JOptionPane.YES_OPTION){
+            try {
+                
+                for (Tarea tarea : listaActual.getTareas()) {
+                    tjc.destroy(tarea.getId());
+                }
+                
+                ltjc.destroy(listaActual.getId());
+            } catch (NonexistentEntityException ex) {
+                Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        actualizarListaTareas();
     }//GEN-LAST:event_btnBorrarListaActionPerformed
+
+    private void lstListaTareasValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstListaTareasValueChanged
+        // TODO add your handling code here:
+        if(!evt.getValueIsAdjusting()){
+            listaActual = new ListaTareasJpaController(emf).getListaTareas(usuario.getId(), lstListaTareas.getSelectedValue());
+            mostrarTareas(listaActual.getId());
+        }
+    }//GEN-LAST:event_lstListaTareasValueChanged
+
+    private void btnBorrarTareaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBorrarTareaActionPerformed
+        // TODO add your handling code here:
+        Long idTarea = (Long)tblTareas.getValueAt(tblTareas.getSelectedRow(), 0);
+        int respuesta = JOptionPane.showConfirmDialog(this, "¿Esta seguro de borrar la tarea?", "Borrar tarea", JOptionPane.YES_NO_OPTION);
+        
+        if(respuesta == JOptionPane.YES_OPTION){
+            try {
+                TareaJpaController tjc = new TareaJpaController(emf);
+                tjc.destroy(idTarea);
+            } catch (NonexistentEntityException ex) {
+                Logger.getLogger(FrmPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_btnBorrarTareaActionPerformed
 
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -250,7 +309,6 @@ public class FrmPrincipal extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
     private javax.swing.JList<String> lstListaTareas;
     private javax.swing.JMenu mnArchivo;
     private javax.swing.JMenu mnAyuda;
@@ -258,6 +316,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
     private javax.swing.JMenuItem mniSalir;
     private javax.swing.JPanel pnlLista;
     private javax.swing.JPanel pnlTareas;
+    private javax.swing.JTable tblTareas;
     // End of variables declaration//GEN-END:variables
 
     private void actualizarListaTareas() {
@@ -273,9 +332,17 @@ public class FrmPrincipal extends javax.swing.JFrame {
             public String getElementAt(int index) {
                 return listas.get(index).getNombre();
             }
-            
-            
-            
         });
+    }
+
+    private void mostrarTareas(Long id) {
+        DefaultTableModel modelo = (DefaultTableModel) tblTareas.getModel();
+        modelo.getDataVector().clear();
+        
+        List<Tarea> tareas = new TareaJpaController(emf).findTareaEntitiesByLista(id);
+        
+        for (Tarea tarea : tareas) {
+            modelo.addRow(tarea.toArray());
+        }
     }
 }

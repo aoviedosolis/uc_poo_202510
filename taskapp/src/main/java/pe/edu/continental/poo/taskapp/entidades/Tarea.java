@@ -15,6 +15,7 @@ import jakarta.persistence.OneToMany;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Vector;
 
 /**
  *
@@ -161,6 +162,10 @@ public class Tarea implements Serializable {
     @Override
     public String toString() {
         return "pe.edu.continental.poo.taskapp.entidades.Tarea[ id=" + id + " ]";
+    }
+
+    public Object[] toArray() {
+        return new Object[]{id,nombre,descripcion,prioridad,completado,fechaCreacion,fechaVencimiento};
     }
 
 }

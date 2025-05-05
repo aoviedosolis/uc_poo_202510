@@ -4,19 +4,27 @@
  */
 package pe.edu.continental.poo.taskapp.iu;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import pe.edu.continental.poo.taskapp.controladores.TareaJpaController;
+import pe.edu.continental.poo.taskapp.entidades.ListaTareas;
+import pe.edu.continental.poo.taskapp.entidades.Tarea;
+import pe.edu.continental.poo.taskapp.singleton.EntityManagerSingleton;
+
 /**
  *
  * @author aoviedo
  */
 public class DlgTarea extends javax.swing.JDialog {
-
+    private ListaTareas lista;
     /**
      * Creates new form DlgTarea
      */
-    public DlgTarea(java.awt.Frame parent, boolean modal) {
+    public DlgTarea(java.awt.Frame parent, boolean modal,ListaTareas lista) {
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(parent);
+        this.lista = lista;
     }
 
     /**
@@ -58,6 +66,11 @@ public class DlgTarea extends javax.swing.JDialog {
         jPanel1.add(btnCancelar);
 
         btnGuardar.setText("Guardar");
+        btnGuardar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuardarActionPerformed(evt);
+            }
+        });
         jPanel1.add(btnGuardar);
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.PAGE_END);
@@ -168,47 +181,21 @@ public class DlgTarea extends javax.swing.JDialog {
         this.dispose();
     }//GEN-LAST:event_btnCancelarActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(DlgTarea.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(DlgTarea.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(DlgTarea.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(DlgTarea.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                DlgTarea dialog = new DlgTarea(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
+    private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
+        // TODO add your handling code here:
+        Tarea tarea = new Tarea();
+        tarea.setNombre(txtNombre.getText());
+        tarea.setDescripcion(txtDescripcion.getText());
+        tarea.setCompletado(cbxCompletado.isSelected());
+        tarea.setPrioridad((Integer)spPrioridad.getValue());
+        tarea.setFechaCreacion(LocalDate.parse(txtFechaInicio.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        tarea.setFechaVencimiento(LocalDate.parse(txtFechaVcto.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        tarea.setLista(lista);
+        
+        TareaJpaController tjc = new TareaJpaController(EntityManagerSingleton.getInstance().getEntityManagerFactory());
+        tjc.create(tarea);
+        dispose();
+    }//GEN-LAST:event_btnGuardarActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;

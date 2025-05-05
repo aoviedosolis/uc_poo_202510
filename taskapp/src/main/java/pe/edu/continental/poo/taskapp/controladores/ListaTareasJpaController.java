@@ -147,4 +147,18 @@ public class ListaTareasJpaController implements Serializable {
         
         return lst;
     }
+    
+    public ListaTareas getListaTareas(Long id,String nombre){
+        ArrayList<ListaTareas> listas = new ArrayList<>(findListaTareasEntities());
+        ListaTareas resultado = null;
+        
+        for (ListaTareas lista : listas) {
+            if(lista.getUsuario().getId().equals(id) && lista.getNombre().equalsIgnoreCase(nombre)){
+                resultado = lista;
+                break;
+            }
+        }
+        
+        return resultado;
+    }
 }

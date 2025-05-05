@@ -185,5 +185,17 @@ public class TareaJpaController implements Serializable {
             em.close();
         }
     }
+
+    public List<Tarea> findTareaEntitiesByLista(Long id) {
+        ArrayList<Tarea> tareas = new ArrayList<>(findTareaEntities());
+        ArrayList<Tarea> misTareas = new ArrayList<>();
+        
+        for (Tarea tarea : tareas) {
+            if(tarea.getLista().getId().equals(id))
+                misTareas.add(tarea);
+        }
+        
+        return misTareas;
+    }
     
 }
